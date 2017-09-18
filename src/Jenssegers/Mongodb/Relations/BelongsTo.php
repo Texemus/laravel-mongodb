@@ -1,6 +1,7 @@
 <?php namespace Jenssegers\Mongodb\Relations;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class BelongsTo extends \Illuminate\Database\Eloquent\Relations\BelongsTo
 {
@@ -50,10 +51,10 @@ class BelongsTo extends \Illuminate\Database\Eloquent\Relations\BelongsTo
 
     /**
      * @inheritdoc
-     * @param  array   $models
-     * @param  \Illuminate\Database\Eloquent\Collection  $results
-     * @param  string  $relation
-     * @return array
+     * @param array $models
+     * @param Collection $results
+     * @param $relation
+     * @return mixed
      */
     public function match(array $models, Collection $results, $relation)
     {
