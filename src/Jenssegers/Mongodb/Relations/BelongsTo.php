@@ -47,4 +47,28 @@ class BelongsTo extends \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return property_exists($this, 'ownerKey') ? $this->ownerKey : $this->otherKey;
     }
+
+    /**
+     * @inheritdoc
+     * @param  array   $models
+     * @param  \Illuminate\Database\Eloquent\Collection  $results
+     * @param  string  $relation
+     * @return array
+     */
+    public function match(array $models, Collection $results, $relation)
+    {
+        // Convert ObjectID to string
+        $results = $results->map(function ($result) {
+            $result[$this->ownerKey] = (string) $result[$this->ownerKey];
+            return $result;
+        });
+
+        // Convert ObjectID to string
+        foreach($models as &$model) {
+            $model[$this->foreignKey] = (string) $model[$this->foreignKey];
+        }
+
+        return parent::match($models, $results, $relation);
+    }
+
 }

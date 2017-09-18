@@ -75,4 +75,24 @@ class HasMany extends EloquentHasMany
 
         return $query->where($this->getHasCompareKey(), 'exists', true);
     }
+
+    /**
+     * Match the eagerly loaded results to their parents.
+     *
+     * @param array $models
+     * @param Collection $results
+     * @param string $relation
+     * @return array
+     */
+    public function match(array $models, Collection $results, $relation)
+    {
+        // Convert ObjectID to string
+        $results = $results->map(function ($result) {
+            $result[$this->getForeignKeyName()] = (string) $result[$this->getForeignKeyName()];
+
+            return $result;
+        });
+
+        return parent::match($models, $results, $relation);
+    }
 }
