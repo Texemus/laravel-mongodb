@@ -37,6 +37,25 @@ abstract class Model extends BaseModel
     protected $parentRelation;
 
     /**
+     * @inheritdoc
+     *
+     * @param array $options
+     * @return bool
+     */
+    public function save(array $options = [])
+    {
+        // Convert ID's to ObjectID
+        $builder = $this->newBaseQueryBuilder();
+        foreach($this->attributes as $attribute => &$value) {
+            if (ends_with($attribute, '_id')) {
+                $value = $builder->convertKey($value);
+            }
+        }
+
+        return parent::save($options);
+    }
+
+    /**
      * Custom accessor for the model's id.
      *
      * @param  mixed $value
