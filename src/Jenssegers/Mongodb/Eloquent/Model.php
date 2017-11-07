@@ -148,9 +148,9 @@ abstract class Model extends BaseModel
      */
     protected function getAttributeFromArray($key)
     {
-        // Support keys in dot notation.
-        if (str_contains($key, '.')) {
-            return array_get($this->attributes, $key);
+        // Support keys that ends with _id
+        if (ends_with($key, '_id') && isset($this->attributes[$key])) {
+            return $this->attributes[$key];
         }
 
         return parent::getAttributeFromArray($key);
@@ -218,20 +218,37 @@ abstract class Model extends BaseModel
     /**
      * @inheritdoc
      */
-    protected function originalIsNumericallyEquivalent($key)
+    protected function originalIsEquivalent($key, $current)
     {
-        $current = $this->attributes[$key];
+        if (!array_key_exists($key, $this->original)) {
+            return false;
+        }
+
         $original = $this->original[$key];
 
+        if ($current === $original) {
+            return true;
+        }
+
+        if (null === $current) {
+            return false;
+        }
+
         // Date comparison.
-        if (in_array($key, $this->getDates())) {
+        if ($this->isDateAttribute($key)) {
             $current = $current instanceof UTCDateTime ? $this->asDateTime($current) : $current;
             $original = $original instanceof UTCDateTime ? $this->asDateTime($original) : $original;
 
             return $current == $original;
         }
 
-        return parent::originalIsNumericallyEquivalent($key);
+        if ($this->hasCast($key)) {
+            return $this->castAttribute($key, $current) ===
+                $this->castAttribute($key, $original);
+        }
+
+        return is_numeric($current) && is_numeric($original)
+            && strcmp((string) $current, (string) $original) === 0;
     }
 
     /**
@@ -318,8 +335,12 @@ abstract class Model extends BaseModel
 
         foreach ($values as $value) {
             // Don't add duplicate values when we only want unique values.
-            if ($unique and in_array($value, $current)) {
+            if ($unique and isset($current->{$value})) {
                 continue;
+            }
+            if ($current instanceof ObjectID) {
+                $currentArray[] = (string) $current;
+                $current = $currentArray;
             }
 
             array_push($current, $value);

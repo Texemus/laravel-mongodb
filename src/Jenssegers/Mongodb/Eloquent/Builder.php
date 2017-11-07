@@ -168,4 +168,11 @@ class Builder extends EloquentBuilder
 
         return $results;
     }
+
+    /**
+     * @return \Illuminate\Database\ConnectionInterface
+     */
+    public function getConnection() {
+        return $this->query->getConnection();
+    }
 }
