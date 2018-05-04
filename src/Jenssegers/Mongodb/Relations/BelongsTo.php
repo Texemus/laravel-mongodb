@@ -78,7 +78,13 @@ class BelongsTo extends \Illuminate\Database\Eloquent\Relations\BelongsTo
 
         // Convert ObjectID to string
         foreach($models as &$model) {
-            $model[$this->foreignKey] = (string) $model[$this->foreignKey];
+            $value = null;
+
+            if ($model[$this->foreignKey] !== null) {
+                $value = (string) $model[$this->foreignKey];
+            }
+            
+            $model[$this->foreignKey] = $value;            
         }
 
         return parent::match($models, $results, $relation);
