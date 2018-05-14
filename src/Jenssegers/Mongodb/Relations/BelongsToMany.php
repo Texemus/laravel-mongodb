@@ -103,7 +103,7 @@ class BelongsToMany extends EloquentBelongsToMany
         // accomplish this which will insert the record and any more attributes.
         $instance->save(['touch' => false]);
 
-        $this->attach($instance, $joining, $touch);
+        $this->attach($instance->getKey(), $joining, $touch);
 
         return $instance;
     }

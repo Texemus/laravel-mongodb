@@ -3,6 +3,7 @@
 namespace Jenssegers\Mongodb\Relations;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class BelongsTo extends \Illuminate\Database\Eloquent\Relations\BelongsTo
 {
@@ -59,4 +60,34 @@ class BelongsTo extends \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return property_exists($this, 'ownerKey') ? $this->ownerKey : $this->otherKey;
     }
+
+    /**
+     * @inheritdoc
+     * @param array $models
+     * @param Collection $results
+     * @param $relation
+     * @return mixed
+     */
+    public function match(array $models, Collection $results, $relation)
+    {
+        // Convert ObjectID to string
+        $results = $results->map(function ($result) {
+            $result[$this->ownerKey] = (string) $result[$this->ownerKey];
+            return $result;
+        });
+
+        // Convert ObjectID to string
+        foreach($models as &$model) {
+            $value = null;
+
+            if ($model[$this->foreignKey] !== null) {
+                $value = (string) $model[$this->foreignKey];
+            }
+            
+            $model[$this->foreignKey] = $value;            
+        }
+
+        return parent::match($models, $results, $relation);
+    }
+
 }
