@@ -39,7 +39,7 @@ class EmbedsMany extends EmbedsOneOrMany
     public function performInsert(Model $model)
     {
         // Generate a new key if needed.
-        if ($model->getKeyName() == '_id' and !$model->getKey()) {
+        if ($model->getKeyName() == '_id' && !$model->getKey()) {
             $model->setAttribute('_id', new ObjectID);
         }
 
@@ -78,8 +78,7 @@ class EmbedsMany extends EmbedsOneOrMany
         // Get the correct foreign key value.
         $foreignKey = $this->getForeignKeyValue($model);
 
-        // Use array dot notation for better update behavior.
-        $values = array_dot($model->getDirty(), $this->localKey . '.$.');
+        $values = $this->getUpdateValues($model->getDirty(), $this->localKey . '.$.');
 
         // Update document in database.
         $result = $this->getBaseQuery()->where($this->localKey . '.' . $model->getKeyName(), $foreignKey)

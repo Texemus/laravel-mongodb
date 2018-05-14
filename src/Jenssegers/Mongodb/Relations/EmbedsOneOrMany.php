@@ -94,9 +94,11 @@ abstract class EmbedsOneOrMany extends Relation
     /**
      * Shorthand to get the results of the relationship.
      *
+     * @param  array $columns
+     *
      * @return Collection
      */
-    public function get()
+    public function get($columns = ['*'])
     {
         return $this->getResults();
     }
@@ -265,7 +267,7 @@ abstract class EmbedsOneOrMany extends Relation
             $models = $this->eagerLoadRelations($models);
         }
 
-        return new Collection($models);
+        return $this->related->newCollection($models);
     }
 
     /**
@@ -280,7 +282,12 @@ abstract class EmbedsOneOrMany extends Relation
             return;
         }
 
-        $model = $this->related->newFromBuilder((array) $attributes);
+        $connection = $this->related->getConnection();
+
+        $model = $this->related->newFromBuilder(
+            (array) $attributes,
+            $connection ? $connection->getName() : null
+        );
 
         $model->setParentRelation($this);
 
@@ -367,5 +374,33 @@ abstract class EmbedsOneOrMany extends Relation
     protected function getParentKey()
     {
         return $this->parent->getKey();
+    }
+
+    /**
+     * Return update values
+     *
+     * @param $array
+     * @param string $prepend
+     * @return array
+     */
+    public static function getUpdateValues($array, $prepend = '')
+    {
+        $results = [];
+
+        foreach ($array as $key => $value) {
+            $results[$prepend.$key] = $value;
+        }
+
+        return $results;
+    }
+
+    /**
+     * Get the foreign key for the relationship.
+     *
+     * @return string
+     */
+    public function getQualifiedForeignKeyName()
+    {
+        return $this->foreignKey;
     }
 }
